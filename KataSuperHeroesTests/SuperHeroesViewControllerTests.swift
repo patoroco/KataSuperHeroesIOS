@@ -13,7 +13,7 @@ import UIKit
 @testable import KataSuperHeroes
 
 class SuperHeroesViewControllerTests: AcceptanceTestCase {
-
+    
     private let repository = MockSuperHeroesRepository()
 
     func testShowsEmptyCaseIfThereAreNoSuperHeroes() {
@@ -31,6 +31,49 @@ class SuperHeroesViewControllerTests: AcceptanceTestCase {
         
         tester().waitForAbsenceOfViewWithAccessibilityLabel("¯\\_(ツ)_/¯")
     }
+    
+    func testShowTenSuperHeroes() {
+        givenThereAreSomeSuperHeroes(10)
+        
+        openSuperHeroesViewController()
+        
+        let tableView = tester().waitForViewWithAccessibilityLabel("SuperHeroesTableView") as! UITableView
+        
+        expect(tableView.numberOfRowsInSection(0)).to(equal(10))
+    }
+    
+    func testShowSuperHeroesName() {
+        let superHeroes = givenThereAreSomeSuperHeroes(10)
+        
+        openSuperHeroesViewController()
+        
+        for i in 0..<superHeroes.count {
+            let superHeroCell = tester().waitForViewWithAccessibilityLabel(superHeroes[i].name)
+                as! SuperHeroTableViewCell
+            
+            expect(superHeroCell.nameLabel.text).to(equal(superHeroes[i].name))
+        }
+    }
+    
+    
+    func testNavigationToDetail() {
+        let superHeroes = givenThereAreSomeSuperHeroes(10)
+        
+        openSuperHeroesViewController()
+        
+        let index = 4
+        let indexPath = NSIndexPath(forRow: index, inSection: 0)
+        let name = superHeroes[index].name
+        
+        tester().tapRowAtIndexPath(indexPath, inTableViewWithAccessibilityIdentifier: "SuperHeroesTableView")
+        tester().waitForAnimationsToFinish()
+        tester().waitForViewWithAccessibilityLabel(name)
+    }
+
+    
+    
+    
+    
 
     private func givenThereAreNoSuperHeroes() {
         givenThereAreSomeSuperHeroes(0)
